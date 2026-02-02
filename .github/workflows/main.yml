@@ -40,10 +40,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build binary
+      - name: Build binary artifacts
         run: npm run buildbinary
 
-      - name: Upload Binary
+      - name: Upload binary artifacts
         uses: actions/upload-artifact@v4
         with:
           name: oracledb_linux_${{ matrix.platform }}
@@ -67,10 +67,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build binary
+      - name: Build binary artifacts
         run: npm run buildbinary
 
-      - name: Upload binary
+      - name: Upload binary artifacts
         uses: actions/upload-artifact@v4
         with:
           name: oracledb_macos_arm64
@@ -94,17 +94,17 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build binary
+      - name: Build binary artifacts
         run: npm run buildbinary
 
-      - name: Upload binary
+      - name: Upload binary artifacts
         uses: actions/upload-artifact@v4
         with:
           name: oracledb_windows_x64
           path: package/Staging/
 
   combine_artifacts:
-    name: Combine artifacts and build package
+    name: Combine binary artifacts and build package
     if: ${{ always() }}
     needs: [build_linux_binaries, build_macos_binaries, build_windows_binaries]
     runs-on: ubuntu-latest
@@ -119,12 +119,12 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Download Staging artifacts
+      - name: Download binary artifacts
         uses: actions/download-artifact@v4
         with:
-          path: package/
+          path: build/Release/
 
-      - name: Merge Staging files
+      - name: Merge binary files
         run: |
           mkdir -p package/Staging
           for dir in package/*_staging; do
