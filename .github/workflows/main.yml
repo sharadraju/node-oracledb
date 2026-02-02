@@ -122,12 +122,12 @@ jobs:
       - name: Download binary artifacts
         uses: actions/download-artifact@v4
         with:
-          path: build/Release/
+          path: package/
 
       - name: Merge binary files
         run: |
           mkdir -p package/Staging
-          for dir in package/*_staging; do
+          for dir in package/oracledb_*; do
             mv "$dir"/* package/Staging/ || true
           done
 
