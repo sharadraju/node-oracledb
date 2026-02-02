@@ -20,12 +20,12 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             platform: x64
             container: node:20
-          - os: ubuntu-latest # Adjust for ARM64 runner; GitHub has beta ARM64 runners
+          - os: ubuntu-24.04-arm
             platform: arm64
-            container: node:20-arm64
+            container: node:20
 
     container: ${{ matrix.container }}
 
