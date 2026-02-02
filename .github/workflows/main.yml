@@ -43,10 +43,10 @@ jobs:
       - name: Build binary
         run: npm run buildbinary
 
-      - name: Upload Staging artifact
+      - name: Upload Binary
         uses: actions/upload-artifact@v4
         with:
-          name: Linux_${{ matrix.platform }}_staging
+          name: oracledb_linux_${{ matrix.platform }}
           path: package/Staging/
 
   build_macos_binaries:
@@ -70,10 +70,10 @@ jobs:
       - name: Build binary
         run: npm run buildbinary
 
-      - name: Upload Staging artifact
+      - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
-          name: macos_arm64_staging
+          name: oracledb_macos_arm64
           path: package/Staging/
 
   build_windows_binaries:
@@ -97,10 +97,10 @@ jobs:
       - name: Build binary
         run: npm run buildbinary
 
-      - name: Upload Staging artifact
+      - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
-          name: windows_x64_staging
+          name: oracledb_windows_x64
           path: package/Staging/
 
   combine_artifacts:
