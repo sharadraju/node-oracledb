@@ -4,18 +4,11 @@ on:
   push:
     tags:
       - v*
-  workflow_dispatch:
-    inputs:
-      tgt:
-        description: List of package targets to build
-        default: 'Linux, macOS, Windows'
-        required: false
 
 jobs:
 
   build_linux_binaries:
     name: Build binaries for Linux
-    if: contains(inputs.tgt, 'Linux') || inputs.tgt == ''
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -51,7 +44,6 @@ jobs:
 
   build_macos_binaries:
     name: Build binary for macOS ${{ matrix.platform }}
-    if: contains(inputs.tgt, 'macOS') || inputs.tgt == ''
     runs-on: macos-14 # macOS ARM64
 
     steps:
@@ -78,7 +70,6 @@ jobs:
 
   build_windows_binaries:
     name: Build binary for Windows x64
-    if: contains(inputs.tgt, 'Windows') || inputs.tgt == ''
     runs-on: windows-latest
 
     steps:
