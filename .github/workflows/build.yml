@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - v*
+  workflow_dispatch:
+    inputs:
+      tgt:
+        description: List of package targets to build
+        default: 'Linux, macOS, Windows'
+        required: false
 
 jobs:
 
