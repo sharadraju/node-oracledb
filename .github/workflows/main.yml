@@ -1,39 +1,41 @@
-name: Build node-oracledb Packages
+name: Build node-oracledb packages
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    tags:
+      - v*
+  workflow_dispatch:
+    inputs:
+      tgt:
+        description: List of package targets to build
+        default: 'Linux, macOS, Windows'
+        required: false
 
 jobs:
-  build:
+
+  build_linux_binaries:
+    name: Build binaries for Linux
+    if: contains(inputs.tgt, 'Linux') || inputs.tgt == ''
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        platform:
-          - windows-x64
-          - linux-x64
-          - linux-arm64
-          - macos-arm64
+        include:
+          - os: ubuntu-latest
+            platform: x64
+            container: node:20
+          - os: ubuntu-latest # Adjust for ARM64 runner; GitHub has beta ARM64 runners
+            platform: arm64
+            container: node:20-arm64
 
-    runs-on: ${{ matrix.platform == 'windows-x64' && 'windows-latest' || matrix.platform == 'linux-x64' && 'ubuntu-latest' || matrix.platform == 'macos-arm64' && 'macos-14' || '[self-hosted, linux, ARM64]' }}
+    container: ${{ matrix.container }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           submodules: true
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install build dependencies (Linux)
-        if: contains(matrix.platform, 'linux')
-        run: sudo apt-get update && sudo apt-get install -y build-essential python3
+      - name: Install build dependencies
+        run: apt-get update && apt-get install -y build-essential python3
 
       - name: Install dependencies
         run: npm install
@@ -44,16 +46,71 @@ jobs:
       - name: Upload Staging artifact
         uses: actions/upload-artifact@v4
         with:
-          name: staging-${{ matrix.platform }}
+          name: Linux_${{ matrix.platform }}_staging
           path: package/Staging/
 
-  package:
-    needs: build
+  build_macos_binaries:
+    name: Build binary for macOS ${{ matrix.platform }}
+    if: contains(inputs.tgt, 'macOS') || inputs.tgt == ''
+    runs-on: macos-14 # macOS ARM64
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build binary
+        run: npm run buildbinary
+
+      - name: Upload Staging artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos_arm64_staging
+          path: package/Staging/
+
+  build_windows_binaries:
+    name: Build binary for Windows x64
+    if: contains(inputs.tgt, 'Windows') || inputs.tgt == ''
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build binary
+        run: npm run buildbinary
+
+      - name: Upload Staging artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows_x64_staging
+          path: package/Staging/
+
+  combine_artifacts:
+    name: Combine artifacts and build package
+    if: ${{ always() }}
+    needs: [build_linux_binaries, build_macos_binaries, build_windows_binaries]
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           submodules: true
 
@@ -70,7 +127,7 @@ jobs:
       - name: Merge Staging files
         run: |
           mkdir -p package/Staging
-          for dir in package/staging-*; do
+          for dir in package/*_staging; do
             mv "$dir"/* package/Staging/ || true
           done
 
