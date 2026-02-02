@@ -97,7 +97,6 @@ jobs:
 
   combine_artifacts:
     name: Combine binary artifacts and build package
-    if: ${{ always() }}
     needs: [build_linux_binaries, build_macos_binaries, build_windows_binaries]
     runs-on: ubuntu-latest
 
