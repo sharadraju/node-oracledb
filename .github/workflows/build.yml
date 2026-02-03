@@ -7,7 +7,6 @@ on:
   workflow_dispatch:
 
 jobs:
-
   build_linux_binaries:
     name: Build binaries for Linux
     runs-on: ${{ matrix.os }}
@@ -20,7 +19,6 @@ jobs:
           - os: ubuntu-24.04-arm
             platform: arm64
             container: node:20
-
     container: ${{ matrix.container }}
 
     steps:
@@ -130,4 +128,3 @@ jobs:
         with:
           name: node-oracledb-package
           path: oracledb-*.tgz
-
